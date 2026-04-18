@@ -1,4 +1,4 @@
-// AI Vision: đọc VIN từ ảnh thông qua Lovable AI Gateway (gemini flash)
+// AI Vision: đọc VIN từ ảnh thông qua Vercel AI Gateway (Gemini Flash)
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -16,8 +16,17 @@ interface AiResult {
 export const scanVinAi = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }): Promise<AiResult> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("LOVABLE_API_KEY chưa được cấu hình");
+    // Vercel AI Gateway - uses AI_GATEWAY_API_KEY env var
+    // Falls back to gateway.ai.vercel.sh which requires the API key
+    const gatewayUrl = "https://gateway.ai.vercel.sh/v1";
+    const apiKey = process.env.AI_GATEWAY_API_KEY;
+    
+    if (!apiKey) {
+      // If no API key, provide helpful error message
+      throw new Error(
+        "AI Vision chưa được cấu hình. Vui lòng thêm AI_GATEWAY_API_KEY trong Settings → Vars."
+      );
+    }
 
     // Chuẩn hoá thành data URL
     const imageUrl = data.imageBase64.startsWith("data:")
@@ -29,14 +38,14 @@ export const scanVinAi = createServerFn({ method: "POST" })
       "VIN gồm đúng 17 ký tự A-Z (trừ I, O, Q) và số 0-9. " +
       "Trả về kết quả qua tool extract_vin. Nếu không đọc được, đặt vin=null và mô tả lý do trong notes.";
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const res = await fetch(`${gatewayUrl}/chat/completions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash",
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -77,7 +86,7 @@ export const scanVinAi = createServerFn({ method: "POST" })
     });
 
     if (res.status === 429) throw new Error("Quá nhiều yêu cầu, thử lại sau ít phút.");
-    if (res.status === 402) throw new Error("Hết credit AI, hãy nạp thêm trong Settings → Workspace → Usage.");
+    if (res.status === 402) throw new Error("Hết credit AI, vui lòng kiểm tra Vercel AI Gateway.");
     if (!res.ok) {
       const t = await res.text();
       throw new Error(`AI Gateway lỗi ${res.status}: ${t.slice(0, 200)}`);

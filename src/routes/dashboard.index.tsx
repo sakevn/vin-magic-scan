@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Car, MapPin, Calendar, Factory, Hash, Wrench, Building2, Cpu, Fingerprint, ScanLine, Clock } from "lucide-react";
+import { Search, Loader2, Car, MapPin, Calendar, Factory, Hash, Wrench, Building2, Cpu, Fingerprint, ScanLine, Clock, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { VinScanner } from "@/components/VinScanner";
 import { decodeVinForUser } from "@/server/decode.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { VinResult } from "@/lib/vin-decoder";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -33,12 +34,33 @@ interface HistoryRow {
 }
 
 function DashboardPage() {
+  const { user } = useAuth();
+  const nav = useNavigate();
   const [vin, setVin] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VinResult | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [saving, setSaving] = useState(false);
   const decodeFn = useServerFn(decodeVinForUser);
+
+  async function saveToVehicles() {
+    if (!result || !user) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("vehicles")
+      .insert({
+        user_id: user.id,
+        vin: result.vin,
+        decoded: result as any,
+      })
+      .select("id")
+      .single();
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Đã lưu vào tài sản", { description: "Bạn có thể cập nhật chi tiết & ảnh đăng ký." });
+    nav({ to: "/dashboard/vehicles/$id", params: { id: data!.id } });
+  }
 
   async function loadHistory() {
     const { data } = await supabase
@@ -146,6 +168,20 @@ function DashboardPage() {
                 <InfoRow icon={<Building2 className="h-4 w-4" />} label="Nhà máy" value={result.plant} />
                 <InfoRow icon={<Cpu className="h-4 w-4" />} label="Động cơ" value={result.engine} />
                 <InfoRow icon={<Fingerprint className="h-4 w-4" />} label="Serial" value={result.serial_number} mono />
+              </div>
+              <div className="p-5 border-t border-border/60 bg-secondary/30 flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  Lưu xe này vào tài sản để cập nhật biển số, chủ xe, tải ảnh đăng ký…
+                </div>
+                <Button
+                  size="sm"
+                  onClick={saveToVehicles}
+                  disabled={saving}
+                  className="bg-gradient-primary text-primary-foreground"
+                >
+                  {saving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Bookmark className="h-4 w-4 mr-1.5" />}
+                  Lưu vào tài sản
+                </Button>
               </div>
             </Card>
           </motion.div>

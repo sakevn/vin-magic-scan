@@ -84,7 +84,7 @@ function VehiclesPage() {
             className="w-full sm:w-64"
           />
           <ExportMenu rows={filtered} disabled={!filtered.length} />
-          <Link to="/scan">
+          <Link to="/dashboard">
             <Button className="bg-gradient-primary text-primary-foreground">
               <Plus className="h-4 w-4 mr-1" /> Quét thêm
             </Button>
@@ -101,7 +101,7 @@ function VehiclesPage() {
           {rows.length === 0 ? (
             <>
               <Car className="h-10 w-10 mx-auto mb-3 opacity-50" />
-              Chưa có xe nào. Hãy <Link to="/scan" className="text-primary underline">quét VIN</Link> rồi nhấn “Lưu vào tài sản”.
+              Chưa có xe nào. Hãy <Link to="/dashboard" className="text-primary underline">quét VIN</Link> rồi nhấn “Lưu vào tài sản”.
             </>
           ) : "Không có kết quả phù hợp."}
         </Card>

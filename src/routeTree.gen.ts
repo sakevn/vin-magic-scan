@@ -15,10 +15,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as DashboardVehiclesRouteImport } from './routes/dashboard.vehicles'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardKeysRouteImport } from './routes/dashboard.keys'
 import { Route as DashboardDocsRouteImport } from './routes/dashboard.docs'
+import { Route as ApiDecodeRouteImport } from './routes/api.decode'
+import { Route as AdminLogsRouteImport } from './routes/admin.logs'
+import { Route as AdminKeysRouteImport } from './routes/admin.keys'
 import { Route as DashboardVehiclesIdRouteImport } from './routes/dashboard.vehicles.$id'
 
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -51,6 +55,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const DashboardVehiclesRoute = DashboardVehiclesRouteImport.update({
   id: '/vehicles',
   path: '/vehicles',
@@ -71,6 +80,21 @@ const DashboardDocsRoute = DashboardDocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiDecodeRoute = ApiDecodeRouteImport.update({
+  id: '/api/decode',
+  path: '/api/decode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminKeysRoute = AdminKeysRouteImport.update({
+  id: '/keys',
+  path: '/keys',
+  getParentRoute: () => AdminRoute,
+} as any)
 const DashboardVehiclesIdRoute = DashboardVehiclesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -79,40 +103,51 @@ const DashboardVehiclesIdRoute = DashboardVehiclesIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
+  '/admin/keys': typeof AdminKeysRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/api/decode': typeof ApiDecodeRoute
   '/dashboard/docs': typeof DashboardDocsRoute
   '/dashboard/keys': typeof DashboardKeysRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/vehicles': typeof DashboardVehiclesRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/vehicles/$id': typeof DashboardVehiclesIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/admin/keys': typeof AdminKeysRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/api/decode': typeof ApiDecodeRoute
   '/dashboard/docs': typeof DashboardDocsRoute
   '/dashboard/keys': typeof DashboardKeysRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/vehicles': typeof DashboardVehiclesRouteWithChildren
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/vehicles/$id': typeof DashboardVehiclesIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
+  '/admin/keys': typeof AdminKeysRoute
+  '/admin/logs': typeof AdminLogsRoute
+  '/api/decode': typeof ApiDecodeRoute
   '/dashboard/docs': typeof DashboardDocsRoute
   '/dashboard/keys': typeof DashboardKeysRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/vehicles': typeof DashboardVehiclesRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/vehicles/$id': typeof DashboardVehiclesIdRoute
 }
@@ -124,22 +159,29 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/forgot-password'
+    | '/admin/keys'
+    | '/admin/logs'
+    | '/api/decode'
     | '/dashboard/docs'
     | '/dashboard/keys'
     | '/dashboard/profile'
     | '/dashboard/vehicles'
+    | '/admin/'
     | '/dashboard/'
     | '/dashboard/vehicles/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth'
     | '/forgot-password'
+    | '/admin/keys'
+    | '/admin/logs'
+    | '/api/decode'
     | '/dashboard/docs'
     | '/dashboard/keys'
     | '/dashboard/profile'
     | '/dashboard/vehicles'
+    | '/admin'
     | '/dashboard'
     | '/dashboard/vehicles/$id'
   id:
@@ -149,20 +191,25 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/forgot-password'
+    | '/admin/keys'
+    | '/admin/logs'
+    | '/api/decode'
     | '/dashboard/docs'
     | '/dashboard/keys'
     | '/dashboard/profile'
     | '/dashboard/vehicles'
+    | '/admin/'
     | '/dashboard/'
     | '/dashboard/vehicles/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  ApiDecodeRoute: typeof ApiDecodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -209,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/dashboard/vehicles': {
       id: '/dashboard/vehicles'
       path: '/vehicles'
@@ -237,6 +291,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDocsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/decode': {
+      id: '/api/decode'
+      path: '/api/decode'
+      fullPath: '/api/decode'
+      preLoaderRoute: typeof ApiDecodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/keys': {
+      id: '/admin/keys'
+      path: '/keys'
+      fullPath: '/admin/keys'
+      preLoaderRoute: typeof AdminKeysRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/dashboard/vehicles/$id': {
       id: '/dashboard/vehicles/$id'
       path: '/$id'
@@ -246,6 +321,20 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminKeysRoute: typeof AdminKeysRoute
+  AdminLogsRoute: typeof AdminLogsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminKeysRoute: AdminKeysRoute,
+  AdminLogsRoute: AdminLogsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardVehiclesRouteChildren {
   DashboardVehiclesIdRoute: typeof DashboardVehiclesIdRoute
@@ -280,10 +369,11 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  ApiDecodeRoute: ApiDecodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Car, MapPin, Calendar, Factory, Hash, Wrench, Building2, Cpu, Fingerprint, ScanLine, Clock } from "lucide-react";
+import { Search, Loader2, Car, MapPin, Calendar, Factory, Hash, Wrench, Building2, Cpu, Fingerprint, ScanLine, Clock, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { VinScanner } from "@/components/VinScanner";
 import { decodeVinForUser } from "@/server/decode.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { VinResult } from "@/lib/vin-decoder";
 
 export const Route = createFileRoute("/dashboard/")({

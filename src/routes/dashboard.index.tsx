@@ -34,12 +34,33 @@ interface HistoryRow {
 }
 
 function DashboardPage() {
+  const { user } = useAuth();
+  const nav = useNavigate();
   const [vin, setVin] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VinResult | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [saving, setSaving] = useState(false);
   const decodeFn = useServerFn(decodeVinForUser);
+
+  async function saveToVehicles() {
+    if (!result || !user) return;
+    setSaving(true);
+    const { data, error } = await supabase
+      .from("vehicles")
+      .insert({
+        user_id: user.id,
+        vin: result.vin,
+        decoded: result as any,
+      })
+      .select("id")
+      .single();
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Đã lưu vào tài sản", { description: "Bạn có thể cập nhật chi tiết & ảnh đăng ký." });
+    nav({ to: "/dashboard/vehicles/$id", params: { id: data!.id } });
+  }
 
   async function loadHistory() {
     const { data } = await supabase

@@ -169,6 +169,20 @@ function DashboardPage() {
                 <InfoRow icon={<Cpu className="h-4 w-4" />} label="Động cơ" value={result.engine} />
                 <InfoRow icon={<Fingerprint className="h-4 w-4" />} label="Serial" value={result.serial_number} mono />
               </div>
+              <div className="p-5 border-t border-border/60 bg-secondary/30 flex flex-wrap items-center justify-between gap-3">
+                <div className="text-xs text-muted-foreground">
+                  Lưu xe này vào tài sản để cập nhật biển số, chủ xe, tải ảnh đăng ký…
+                </div>
+                <Button
+                  size="sm"
+                  onClick={saveToVehicles}
+                  disabled={saving}
+                  className="bg-gradient-primary text-primary-foreground"
+                >
+                  {saving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Bookmark className="h-4 w-4 mr-1.5" />}
+                  Lưu vào tài sản
+                </Button>
+              </div>
             </Card>
           </motion.div>
         )}

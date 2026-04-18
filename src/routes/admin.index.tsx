@@ -8,6 +8,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
 import { useServerFn } from "@tanstack/react-start";
 import { adminListUsers, adminToggleRole } from "@/server/admin.functions";
+import { useAccessToken } from "@/hooks/useAccessToken";
 
 export const Route = createFileRoute("/admin/")({
   component: () => (
@@ -22,12 +23,19 @@ export const Route = createFileRoute("/admin/")({
 function UsersAdmin() {
   const list = useServerFn(adminListUsers);
   const toggle = useServerFn(adminToggleRole);
+  const { withAuth } = useAccessToken();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function reload() {
     setLoading(true);
-    try { setUsers((await list()) as any[]); } finally { setLoading(false); }
+    try { 
+      setUsers((await list({ data: await withAuth({}) })) as any[]); 
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { 
+      setLoading(false); 
+    }
   }
   useEffect(() => { reload(); }, []);
 

@@ -12,6 +12,7 @@ import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
 import { useServerFn } from "@tanstack/react-start";
 import { createApiKey, listApiKeys, deleteApiKey, toggleApiKey } from "@/server/api-keys.functions";
+import { useAccessToken } from "@/hooks/useAccessToken";
 
 export const Route = createFileRoute("/dashboard/keys")({
   component: () => (
@@ -38,6 +39,7 @@ function KeysPage() {
   const create = useServerFn(createApiKey);
   const del = useServerFn(deleteApiKey);
   const toggle = useServerFn(toggleApiKey);
+  const { withAuth } = useAccessToken();
 
   const [keys, setKeys] = useState<Key[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +50,14 @@ function KeysPage() {
 
   async function reload() {
     setLoading(true);
-    try { setKeys((await list()) as Key[]); } finally { setLoading(false); }
+    try { 
+      const authData = await withAuth({});
+      setKeys((await list({ data: authData })) as Key[]); 
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally { 
+      setLoading(false); 
+    }
   }
   useEffect(() => { reload(); }, []);
 
@@ -56,7 +65,7 @@ function KeysPage() {
     if (!name.trim()) return toast.error("Nhập tên cho key");
     setCreating(true);
     try {
-      const r = await create({ data: { name: name.trim() } });
+      const r = await create({ data: await withAuth({ name: name.trim() }) });
       setNewKey({ key: r.full_key });
       setName("");
       reload();
@@ -112,8 +121,10 @@ function KeysPage() {
                   <Switch
                     checked={k.is_active}
                     onCheckedChange={async (v) => {
-                      await toggle({ data: { id: k.id, is_active: v } });
-                      reload();
+                      try {
+                        await toggle({ data: await withAuth({ id: k.id, is_active: v }) });
+                        reload();
+                      } catch (e) { toast.error((e as Error).message); }
                     }}
                   />
                 </div>
@@ -121,8 +132,10 @@ function KeysPage() {
                   variant="ghost" size="icon"
                   onClick={async () => {
                     if (!confirm(`Xoá key "${k.name}"?`)) return;
-                    await del({ data: { id: k.id } });
-                    reload();
+                    try {
+                      await del({ data: await withAuth({ id: k.id }) });
+                      reload();
+                    } catch (e) { toast.error((e as Error).message); }
                   }}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />

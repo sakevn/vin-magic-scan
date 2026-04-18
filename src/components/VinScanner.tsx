@@ -218,7 +218,7 @@ export function VinScanner({ open, onOpenChange, onDetected }: Props) {
       const reader = new BrowserMultiFormatReader();
       const url = URL.createObjectURL(file);
       try {
-        const result = await reader.decodeFromImageUrl(undefined, url);
+        const result = await reader.decodeFromImageUrl(url);
         const vin = sanitizeVinCandidate(result.getText());
         if (vin) { URL.revokeObjectURL(url); handleSuccess(vin); return; }
       } catch { /* fallback OCR */ }
